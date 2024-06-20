@@ -1,0 +1,21 @@
+{
+  "name": "yetub",
+  "version": "1.0.0",
+  "description": "[YT - Complete Backend Series- Hitesh](https://youtu.be/nhmMx-ys_zQ)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev":"nodemon src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.2"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.4.3"
+  }
+}

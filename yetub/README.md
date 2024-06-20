@@ -104,6 +104,12 @@ tweets.owner - users.id
 [YT - Backend Project Structure - Hitesh](https://youtu.be/eDHl26DWrk4)
 
 src/index.js
+"type": "module",
+npm i -D nodemon prettier
+npm i express mongoose
+"start": "node src/index.js",
+"dev":"nodemon src/index.js"
+npm run dev
 cd src
 mkdir controllers db middlewares models routes utils
 touch app.js index.js constants.js .env .env.sample readme.md
