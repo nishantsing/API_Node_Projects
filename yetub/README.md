@@ -106,7 +106,7 @@ tweets.owner - users.id
 src/index.js
 "type": "module",
 npm i -D nodemon prettier
-npm i express mongoose
+npm i express mongoose dotenv cors
 "start": "node src/index.js",
 "dev":"nodemon src/index.js"
 npm run dev
@@ -142,3 +142,27 @@ touch comment.models.js like.models.js playlist.models.js subscription.models.js
 }
 
 ```
+
+### dotenv issue
+------------------------------------------------
+
+- when you run your Node.js script with a specific path like node src/index.js, you need to ensure that the dotenv configuration correctly points to the .env file inside the src directory. By default, dotenv looks for the .env file in the current working directory (where the node command is executed).
+
+```js
+// Import the dotenv package
+import dotenv from 'dotenv';
+
+// Specify the path to your .env file
+dotenv.config({ path: './src/.env' });
+```
+package.json
+```json
+nodemon -r dotenv/config --experimental-json-modules src/index.js
+```
+
+
+------------------------------------------------
+
+##
+
+In db network access give the machines ip address where the backend is deployed to make it more secure.
