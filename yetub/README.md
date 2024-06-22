@@ -163,6 +163,156 @@ nodemon -r dotenv/config --experimental-json-modules src/index.js
 
 ------------------------------------------------
 
-##
+## connect to db
 
-In db network access give the machines ip address where the backend is deployed to make it more secure.
+- adding CORS to allow selected frontend to connect to our backend, for local give global access *.
+
+In db network access give the machines ip address where the backend is deployed to make it more secure. For local use give 0.0.0.0/0 to give global access.
+
+## Standardized Error Handler and Response (optional)
+
+- async handler to handle try catches which we will be creating inside all the controller functions.
+
+```js
+const asyncHandler = (requestHandler) => {
+  return (req, res, next) => { // middleware fn
+    Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err)); // this cn be replaced by try catch block as well.
+  };
+};
+
+export {asyncHandler}
+
+// try catch implementation
+
+const asyncHandler = (requestHandler) => {
+  return (req, res, next) => {
+    try {
+      const result = requestHandler(req, res, next);
+      if (result instanceof Promise) {
+        result.catch((err) => next(err));
+      }
+    } catch (err) {
+      next(err);
+    }
+  };
+};
+
+export { asyncHandler };
+
+```
+
+
+- Standardized api response (optional)
+
+```js
+
+//Class Function
+class ApiResponse {
+  constructor(statusCode, data, message = "Success") {
+    this.statusCode = statusCode;
+    this.data = data;
+    this.message = message;
+    this.success = statusCode < 400;
+  }
+}
+
+// Constructor Function
+function ApiResponse(statusCode, data, message = "Success") {
+  this.statusCode = statusCode;
+  this.data = data;
+  this.message = message;
+  this.success = statusCode < 400;
+}
+
+const response1 = new ApiResponse(200, { key: "value" });
+
+// Normal Function
+function ApiResponse(statusCode, data, message = "Success") {
+  return {
+    statusCode,
+    data,
+    message,
+    success: statusCode < 400,
+  };
+}
+
+// Example usage:
+const response = ApiResponse(200, { key: "value" });
+```
+
+- Standardized error response (optional)
+
+```js
+class ApiError extends Error { // extending nodejs Error class
+  constructor(
+    statusCode,
+    message = "Something went wrong",
+    error = [],
+    stack = ""
+  ) {
+    super(message)
+    this.statusCode =statusCode
+    this.data = null
+    this.message= message
+    this.success =false
+    this.errors = errors
+
+    if (stack) {
+      this.stack = stack;
+    } else {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+}
+
+// constructor fn
+function ApiError(statusCode, message = "Something went wrong", errors = [], stack = "") {
+  Error.call(this, message); // Call the parent constructor
+  this.name = "ApiError"; // Set the name property to ApiError
+  this.statusCode = statusCode;
+  this.data = null;
+  this.message = message;
+  this.success = false;
+  this.errors = errors;
+
+  if (stack) {
+    this.stack = stack;
+  } else {
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+// Inherit from Error
+ApiError.prototype = Object.create(Error.prototype);
+ApiError.prototype.constructor = ApiError;
+
+// Example usage:
+const errorInstance = new ApiError(404, "Not Found", ["Resource not found"]);
+console.log(errorInstance);
+
+
+// Using normal fn
+function createApiError(statusCode, message = "Something went wrong", errors = [], stack = "") {
+  const error = new Error(message); // Create a new Error object
+  error.name = "ApiError"; // Set the name property to ApiError
+  error.statusCode = statusCode;
+  error.data = null;
+  error.message = message;
+  error.success = false;
+  error.errors = errors;
+
+  if (stack) {
+    error.stack = stack;
+  } else {
+    Error.captureStackTrace(error, createApiError);
+  }
+
+  return error;
+}
+
+// Example usage:
+const errorObject = createApiError(500, "Internal Server Error", ["Database error"]);
+console.log(errorObject);
+/*
+
+```
