@@ -20,4 +20,10 @@ app.use(express.static("public"));
 // Set the directory where the template files are located
 // app.set('views', './views');
 
+//import routes
+import healthcheckRouter from "./routes/healthcheck.routes.js";
+
+//routes
+app.use("/api/v1/healthcheck", healthcheckRouter);
+
 export { app };

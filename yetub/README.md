@@ -316,3 +316,117 @@ console.log(errorObject);
 /*
 
 ```
+## Connecting to DB
+
+```js
+// constant.js 
+export const DB_NAME = "vidtube"
+
+// db/index.js
+import mongoose from "mongoose";
+import { DB_NAME } from "../constants.js";
+
+const connectDB = async () => {
+  try {
+    const connectionInstance = await mongoose.connect(
+      `${process.env.MONGODB_URI}/${DB_NAME}` //mongodb+srv://<username>:<password>@abc.dxmnjif.mongodb.net/DB_NAME
+    );
+
+    console.log(
+      ` \n MongoDB Connected ! DB host: ${connectionInstance.connection.host}`
+    );
+  } catch (error) {
+    console.log("MongoDB Connection error", error);
+    process.exit(1);
+  }
+};
+
+
+```
+
+## Health Check route and testing with postman
+
+- healthcheck.controller.js
+```js
+import { ApiResponse } from "../utils/ApiResponse";
+import { AsyncHandler, asyncHandler } from "../utils/asyncHandler";
+
+const healthcheck = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "OK", "Health check passed"));
+});
+
+export { healthcheck };
+
+
+```
+
+- healthcheck.routes.js
+
+```js
+import { Router } from "express";
+import { healthcheck } from "../controllers/healthcheck.controller";
+
+const router = Router();
+
+router.route("/").get(healthcheck);
+
+export default router;
+
+```
+
+- app.js
+```js
+import express from "express";
+import cors from "cors";
+const app = express();
+
+// middlewares
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  })
+);
+
+app.use(express.json({ limit: "16kb" })); // to get req.body if body is in json format
+app.use(express.urlencoded({ extended: true, limit: "16kb" })); //to get form data from the encoded url
+app.use(express.static("public"));
+
+// Set the view engine to ejs
+// app.set('view engine', 'ejs');
+
+// Set the directory where the template files are located
+// app.set('views', './views');
+
+//import routes
+import healthcheckRouter from "./routes/healthcheck.routes";
+
+//routes
+app.use("/api/v1/healthcheck", healthcheckRouter);
+
+export { app };
+
+
+```
+
+
+- index.js
+```js
+import dotenv from "dotenv";
+import { app } from "./app.js";
+import connectDB from "./db/index.js";
+
+dotenv.config({ path: "./src/.env" }); // path needs to be provided as its looking for .env in the directory where npm command was run that is in the package.json directory.
+
+const PORT = process.env.PORT || 5001;
+connectDB().then(()=>{
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+
+}).catch((err) => console.log("Mongodb Connection error", err));
+
+
+```
