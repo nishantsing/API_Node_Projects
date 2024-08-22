@@ -452,6 +452,8 @@ videoSchema.plugin(mongooseAggregatePaginate);
 - (Mongoose Docs - Schema methods)[https://mongoosejs.com/docs/api/schema.html]
 
 - These methods are closely attached to models instead of controller.
+- pre, post (save, update)
+- methods (can create own methods) userSchema.prototype.methods
 
 - user model
 ```js
