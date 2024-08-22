@@ -565,3 +565,67 @@ userSchema.methods.generateRefreshToken = function () {
 export const User = mongoose.model("User", userSchema);
 
 ```
+
+## Handling Files and Cookies
+
+- 2 ways either store them in a folder in your service or use third party services like AWS, cloudinary. use multer package
+- what we are doing is first saving to our server and then moving it to cloudinary
+- for cookies use cookie-parser package
+- [Express docs](https://expressjs.com/en/api.html)
+  
+```js
+//app/ server.js (npm install cookie-parser)
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
+req.cookies
+
+//multer.middleware.js in middlwares folder (npm i multer)
+import multer from "multer";
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "./public/temp")
+    },
+    filename: function (req, file, cb) {
+      
+      cb(null, file.originalname)
+    }
+  })
+  
+export const upload = multer({ 
+    storage, 
+})
+
+// cloudinary.js in utils folder(npm i cloudinary)
+import {v2 as cloudinary} from "cloudinary"
+import fs from "fs"
+
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET 
+});
+
+const uploadOnCloudinary = async (localFilePath) => {
+    try {
+        if (!localFilePath) return null
+        //upload the file on cloudinary
+        const response = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "auto"
+        })
+        // file has been uploaded successfull
+        //console.log("file is uploaded on cloudinary ", response.url);
+        fs.unlinkSync(localFilePath)
+        return response;
+
+    } catch (error) {
+        fs.unlinkSync(localFilePath) // remove the locally saved temporary file as the upload operation got failed
+        return null;
+    }
+}
+
+
+
+export {uploadOnCloudinary}
+```
